@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Interaktives Arbeitsblatt: Das Daniell-Element</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --mainblue: #2465d4;
+      --accentblue: #eaf1fe;
+      --mainorange: #ffb566;
+      --accentorange: #fff6eb;
+      --shadow: 0 4px 18px #a7b8df33;
+      --radius: 18px;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #eaf1fe 40%, #fff6eb 100%);
+      font-family: 'Inter', Arial, sans-serif;
+      min-height: 100vh;
+      padding-bottom: 32px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      font-weight: 700;
+      letter-spacing: -1px;
+      margin-top: 32px;
+      margin-bottom: 26px;
+      color: var(--mainblue);
+      text-shadow: 0 2px 10px #c9dbfc88;
+    }
+    h2 {
+      margin-top: 0;
+      font-size: 1.4em;
+      color: #fff;
+      background: linear-gradient(90deg, var(--mainblue) 60%, #468bf2 100%);
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 12px 22px 8px 22px;
+      box-shadow: 0 2px 12px #b0c6f944;
+      letter-spacing: 0.5px;
+    }
+    section {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 0 auto 26px auto;
+      max-width: 640px;
+      overflow: hidden;
+      border: 2.5px solid var(--accentblue);
+      transition: box-shadow 0.2s;
+    }
+    section:nth-child(even) {
+      border-color: var(--mainorange);
+      background: var(--accentorange);
+    }
+    .info-img {
+      display: block;
+      margin: 16px auto 24px auto;
+      border-radius: 16px;
+      box-shadow: 0 2px 18px #c9d6ec44;
+      max-width: 99%;
+      max-height: 350px;
+    }
+    .page {
+      display: none;
+      animation: fadeIn 0.6s;
+    }
+    .page.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px);}
+      to   { opacity: 1; transform: none;}
+    }
+    .page-switch-btn {
+      margin: 34px auto 0 auto;
+      display: block;
+      background: linear-gradient(90deg, var(--mainblue), var(--mainorange));
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 1.17em;
+      font-weight: 600;
+      padding: 16px 38px;
+      box-shadow: 0 3px 12px #d4d9e933;
+      letter-spacing: 0.5px;
+      transition: background 0.22s, transform 0.14s;
+      cursor: pointer;
+    }
+    .page-switch-btn:hover {
+      background: linear-gradient(90deg, #184072, #fca44b);
+      transform: scale(1.035);
+    }
+    label {
+      font-weight: 600;
+      color: var(--mainblue);
+      display: block;
+      margin-bottom: 4px;
+      margin-top: 12px;
+    }
+    textarea, select, input[type="text"] {
+      width: 100%;
+      font-size: 1.05em;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1.5px solid #b1c6e2;
+      background: #f5f8ff;
+      outline: none;
+      transition: border 0.15s;
+    }
+    textarea:focus, select:focus, input[type="text"]:focus {
+      border-color: var(--mainblue);
+      background: #eaf1fe;
+    }
+    .drawing-wrapper {
+      border: 2px dashed var(--mainblue);
+      border-radius: 13px;
+      margin-bottom: 14px;
+      margin-top: 10px;
+      background: #fafdff;
+      padding: 8px;
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+    }
+    .canvas-toolbar {
+      margin-bottom: 6px;
+      margin-top: 3px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-size: 0.97em;
+      color: #4678c8;
+      user-select: none;
+      flex-wrap: wrap;
+    }
+    .canvas-toolbar button {
+      font-size: 1em;
+      padding: 5px 13px;
+      border-radius: 7px;
+      border: none;
+      background: var(--mainorange);
+      color: #333;
+      box-shadow: 0 1px 6px #ffb56633;
+      transition: background 0.16s;
+      cursor: pointer;
+    }
+    .canvas-toolbar button.selected,
+    .canvas-toolbar button:hover {
+      background: #ffa236;
+    }
+    .canvas-toolbar label {
+      margin-top: 0;
+      color: #2465d4cc;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+    canvas {
+      border-radius: 10px;
+      box-shadow: 0 1px 7px #b1c6e2bb;
+      display: block;
+      margin-bottom: 3px;
+      margin-top: 5px;
+      background: #fff;
+      width: 100%;
+      max-width: 530px;
+      height: 290px;
+      touch-action: none;
+    }
+    .pull-down {
+      margin-bottom: 12px;
+      margin-top: 6px;
+    }
+    button[type="button"].export {
+      margin: 0 auto;
+      display: block;
+      background: linear-gradient(90deg, var(--mainblue), var(--mainorange));
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      font-size: 1.17em;
+      font-weight: 600;
+      padding: 16px 38px;
+      box-shadow: 0 3px 12px #d4d9e933;
+      margin-top: 34px;
+      letter-spacing: 0.5px;
+      transition: background 0.22s, transform 0.14s;
+    }
+    button[type="button"].export:hover {
+      background: linear-gradient(90deg, #184072, #fca44b);
+      transform: scale(1.035);
+    }
+    .helper {
+      font-size: 0.96em;
+      color: #42629a;
+      margin-bottom: 8px;
+      background: #eaf1feaa;
+      border-radius: 7px;
+      padding: 6px 11px;
+      margin-top: 0;
+      margin-left: 0;
+      display: block;
+      box-shadow: 0 1px 4px #b1c6e244;
+    }
+    .canvas-toolbar .tool-label {
+      font-size: 0.98em;
+      color: #666;
+      margin-left: 7px;
+      font-weight: 500;
+    }
+    .canvas-text-input {
+      position: absolute;
+      z-index: 1000;
+      font-size: 16px;
+      font-family: 'Inter', Arial, sans-serif;
+      border: 1.2px solid #2465d4cc;
+      border-radius: 6px;
+      padding: 2px 4px;
+      min-width: 48px;
+      min-height: 22px;
+      background: #fff;
+      color: #222;
+      outline: none;
+      box-shadow: 0 1px 6px #b1c6e244;
+      resize: both;
+      overflow: auto;
+    }
+    @media (max-width: 650px) {
+      section, .drawing-wrapper { max-width: 99vw; }
+      canvas { max-width: 99vw; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Interaktives Arbeitsblatt: Das Daniell-Element</h1>
+  
+  <!-- Seite 1: Einleitung und Abbildung -->
+  <div class="page active" id="seite1">
+    <section>
+      <h2>1) Aufbau des Daniell-Elements</h2>
+      <p>
+        Das Daniell-Element ist eine galvanische Zelle und besteht aus zwei Halbzellen: Einer Zink-Halbzelle und einer Kupfer-Halbzelle. Sie sind durch eine Salzbrücke verbunden.
+      </p>
+      <img src="element.png" alt="Daniell-Element" class="info-img">
+    </section>
+    <section>
+      <h2>2) Beobachtungen</h2>
+      <ul>
+        <li>Am Zinkstab bilden sich Zinkionen und der Zinkstab löst sich langsam auf.</li>
+        <li>Am Kupferstab scheiden sich Kupferionen als festes Kupfer ab.</li>
+        <li>In der Salzbrücke findet ein Ionenfluss statt.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>3) Fragestellungen</h2>
+      <ol>
+        <li>Wie funktioniert der Elektronenfluss im Daniell-Element?</li>
+        <li>Welche Rolle spielt die Salzbrücke?</li>
+        <li>Welche chemischen Prozesse laufen an den Elektroden ab?</li>
+      </ol>
+    </section>
+    <button class="page-switch-btn" onclick="zeigeSeite(2)">Hier geht's zu den Aufgaben</button>
+  </div>
+  
+  <!-- Seite 2: Aufgabenbereich -->
+  <div class="page" id="seite2">
+    <form id="worksheet" autocomplete="off">
+      <section>
+        <h2>a) Zeichnung und Beschriftung</h2>
+        <span class="helper">Zeichne das Daniell-Element mit allen geforderten Beschriftungen. Nutze die Werkzeuge unten, um frei zu zeichnen, Formen zu nutzen oder Textfelder zu platzieren.</span>
+        <div class="drawing-wrapper" id="drawing-wrapper">
+          <div class="canvas-toolbar">
+            <span class="tool-label">Werkzeug:</span>
+            <button type="button" id="tool-pen"    onclick="setTool('pen'); return false;"    class="selected">Stift</button>
+            <button type="button" id="tool-line"   onclick="setTool('line'); return false;">Linie</button>
+            <button type="button" id="tool-rect"   onclick="setTool('rect'); return false;">Rechteck</button>
+            <button type="button" id="tool-circle" onclick="setTool('circle'); return false;">Kreis</button>
+            <button type="button" id="tool-text"   onclick="setTool('text'); return false;">Text</button>
+            <button type="button" onclick="undo(); return false;">Rückgängig</button>
+            <button type="button" onclick="clearCanvas(); return false;">Löschen</button>
+            <label for="farbe">Farbe:</label>
+            <input type="color" id="farbe" value="#2465d4" onchange="changeColor(this.value)">
+            <label for="dicke">Dicke:</label>
+            <input type="range" id="dicke" min="2" max="10" value="3" onchange="changeWidth(this.value)">
+          </div>
+          <canvas id="zeichenfeld" width="520" height="290"></canvas>
+        </div>
+      </section>
+
+      <section>
+        <h2>b) Erklärung Elektronenfluss</h2>
+        <label for="elektronenfluss">Warum fließen die Elektronen vom Zink zum Kupfer?</label>
+        <textarea id="elektronenfluss" rows="3" placeholder="Deine Antwort..."></textarea>
+      </section>
+
+      <section>
+        <h2>c) Salzbrücke</h2>
+        <label for="salzbruecke">Warum ist die Salzbrücke wichtig? Was passiert ohne sie?</label>
+        <textarea id="salzbruecke" rows="3" placeholder="Deine Antwort..."></textarea>
+      </section>
+
+      <section>
+        <h2>d) Begriffe zuordnen</h2>
+        <div class="pull-down">
+          <label>Der Zinkstab gibt Elektronen ab:</label>
+          <select>
+            <option value="">Begriff auswählen</option>
+            <option>Redoxreaktion</option>
+            <option>Oxidation</option>
+            <option>Reduktion</option>
+            <option>Elektronenfluss</option>
+          </select>
+        </div>
+        <div class="pull-down">
+          <label>Die Kupferionen nehmen Elektronen auf:</label>
+          <select>
+            <option value="">Begriff auswählen</option>
+            <option>Redoxreaktion</option>
+            <option>Oxidation</option>
+            <option>Reduktion</option>
+            <option>Elektronenfluss</option>
+          </select>
+        </div>
+        <div class="pull-down">
+          <label>Die Reaktion im Daniell-Element ist insgesamt eine:</label>
+          <select>
+            <option value="">Begriff auswählen</option>
+            <option>Redoxreaktion</option>
+            <option>Oxidation</option>
+            <option>Reduktion</option>
+            <option>Elektronenfluss</option>
+          </select>
+        </div>
+        <div class="pull-down">
+          <label>Die Elektronen bewegen sich vom Zink zum Kupfer:</label>
+          <select>
+            <option value="">Begriff auswählen</option>
+            <option>Redoxreaktion</option>
+            <option>Oxidation</option>
+            <option>Reduktion</option>
+            <option>Elektronenfluss</option>
+          </select>
+        </div>
+      </section>
+
+      <section>
+        <h2>e) Zusatzaufgabe</h2>
+        <label for="batterie">Warum kann das Daniell-Element als Batterie bezeichnet werden? Welche Alltagsanwendung fällt dir dazu ein?</label>
+        <textarea id="batterie" rows="2" placeholder="Deine Antwort..."></textarea>
+      </section>
+
+      <button type="button" class="export" onclick="saveAsPDF()">Ergebnisse als PDF speichern</button>
+    </form>
+    <button class="page-switch-btn" onclick="zeigeSeite(1)" style="margin-bottom:40px;">Zurück zur Übersicht</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // Seitenwechsel (Show/Hide)
+    function zeigeSeite(nr) {
+      document.getElementById('seite1').classList.toggle('active', nr === 1);
+      document.getElementById('seite2').classList.toggle('active', nr === 2);
+    }
+
+    // --- Canvas mit Formen und Text-Tool ---
+    const canvas = document.getElementById('zeichenfeld');
+    const wrapper = document.getElementById('drawing-wrapper');
+    const ctx = canvas.getContext('2d');
+    let drawing = false, lastX = 0, lastY = 0, currX = 0, currY = 0;
+    let strokeColor = '#2465d4', strokeWidth = 3;
+    let tool = 'pen'; // default
+    let startX = 0, startY = 0;
+    let shapes = []; // Für Undo
+    let currShape = null;
+    let textInput = null;
+    let textFontSize = 18;
+
+    function setTool(t) {
+      tool = t;
+      ['pen','line','rect','circle','text'].forEach(n => {
+        const btn = document.getElementById('tool-' + n);
+        if (btn) btn.classList.remove('selected');
+      });
+      const selBtn = document.getElementById('tool-' + t);
+      if (selBtn) selBtn.classList.add('selected');
+    }
+    function changeColor(val) { strokeColor = val; }
+    function changeWidth(val) { strokeWidth = val; textFontSize = 12 + Number(val)*1.5; }
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); shapes = []; }
+    function undo() { shapes.pop(); redraw(); }
+
+    // Alle gezeichneten Formen neu zeichnen (nach Undo/Clear)
+    function redraw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (const shape of shapes) {
+        drawShape(shape, false);
+      }
+    }
+    function drawShape(shape, live) {
+      ctx.strokeStyle = shape.color;
+      ctx.lineWidth = shape.width;
+      ctx.font = (shape.fontSize || 18) + "px Inter, Arial, sans-serif";
+      ctx.beginPath();
+      if (shape.type === 'pen') {
+        ctx.moveTo(shape.x0, shape.y0);
+        for (let i = 1; i < shape.points.length; i++) {
+          ctx.lineTo(shape.points[i][0], shape.points[i][1]);
+        }
+        ctx.stroke();
+      } else if (shape.type === 'line') {
+        ctx.moveTo(shape.x0, shape.y0);
+        ctx.lineTo(shape.x1, shape.y1);
+        ctx.stroke();
+      } else if (shape.type === 'rect') {
+        ctx.strokeRect(shape.x0, shape.y0, shape.x1 - shape.x0, shape.y1 - shape.y0);
+      } else if (shape.type === 'circle') {
+        const rx = (shape.x1 - shape.x0) / 2;
+        const ry = (shape.y1 - shape.y0) / 2;
+        const cx = shape.x0 + rx;
+        const cy = shape.y0 + ry;
+        ctx.ellipse(cx, cy, Math.abs(rx), Math.abs(ry), 0, 0, 2 * Math.PI);
+        ctx.stroke();
+      } else if (shape.type === 'text') {
+        ctx.fillStyle = shape.color;
+        let lines = (shape.text || "").split('\n');
+        lines.forEach((line, i) => {
+          ctx.fillText(line, shape.x, shape.y + i*(shape.fontSize || 18)*1.25);
+        });
+      }
+      if (!live) ctx.closePath();
+    }
+
+    // Interaktives Zeichnen
+    canvas.addEventListener('pointerdown', function(e) {
+      if (tool === 'text') {
+        // Text-Tool: HTML-Input-Overlay
+        if (textInput) return; // Nur eins gleichzeitig
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        textInput = document.createElement('textarea');
+        textInput.className = 'canvas-text-input';
+        // Position relativ zum wrapper (da dieser relativ ist)
+        textInput.style.left = (x + canvas.offsetLeft) + 'px';
+        textInput.style.top  = (y + canvas.offsetTop) + 'px';
+        textInput.style.fontSize = textFontSize + 'px';
+        textInput.style.color = strokeColor;
+        textInput.rows = 1;
+        textInput.placeholder = 'Text...';
+        wrapper.appendChild(textInput);
+        textInput.focus();
+
+        function finishText() {
+          if (textInput.value.trim() !== "") {
+            shapes.push({ type: 'text', text: textInput.value, x: x, y: y+textFontSize, color: strokeColor, fontSize: textFontSize });
+            redraw();
+          }
+          if (textInput && textInput.parentNode) textInput.parentNode.removeChild(textInput);
+          textInput = null;
+        }
+        textInput.addEventListener('keydown', function(ev){
+          if (ev.key === "Enter" && !ev.shiftKey) {
+            ev.preventDefault(); finishText();
+          } else if (ev.key === "Escape") {
+            if (textInput && textInput.parentNode) textInput.parentNode.removeChild(textInput);
+            textInput = null;
+          }
+        });
+        setTimeout(() => {
+          document.addEventListener('mousedown', clickOutside, { capture: true });
+        }, 10);
+        function clickOutside(ev) {
+          if (textInput && !textInput.contains(ev.target)) {
+            finishText();
+            document.removeEventListener('mousedown', clickOutside, { capture: true });
+          }
+        }
+        return;
+      }
+      drawing = true;
+      const rect = canvas.getBoundingClientRect();
+      startX = e.clientX - rect.left;
+      startY = e.clientY - rect.top;
+      if (tool === 'pen') {
+        currShape = { type: 'pen', color: strokeColor, width: strokeWidth, x0: startX, y0: startY, points: [[startX, startY]] };
+      }
+    });
+    canvas.addEventListener('pointermove', function(e) {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      currX = e.clientX - rect.left;
+      currY = e.clientY - rect.top;
+      redraw();
+      if (tool === 'pen') {
+        currShape.points.push([currX, currY]);
+        drawShape(currShape, true);
+      } else {
+        let shape = {
+          type: tool, color: strokeColor, width: strokeWidth,
+          x0: startX, y0: startY, x1: currX, y1: currY
+        };
+        drawShape(shape, true);
+      }
+    });
+    canvas.addEventListener('pointerup', function(e) {
+      if (!drawing) return;
+      drawing = false;
+      if (tool === 'pen') {
+        shapes.push(currShape);
+      } else if (tool === 'line' || tool === 'rect' || tool === 'circle') {
+        const rect = canvas.getBoundingClientRect();
+        currX = e.clientX - rect.left;
+        currY = e.clientY - rect.top;
+        shapes.push({type: tool, color: strokeColor, width: strokeWidth, x0: startX, y0: startY, x1: currX, y1: currY});
+      }
+      currShape = null;
+      redraw();
+    });
+    canvas.addEventListener('pointerleave', () => { drawing = false; currShape = null; });
+
+    // --- PDF Export (mit Multi-Line) ---
+    window.saveAsPDF = async function() {
+      const canvas = document.getElementById('zeichenfeld');
+      const zeichenfeldImage = canvas ? canvas.toDataURL('image/png') : "";
+      const eleFlow = document.getElementById('elektronenfluss').value;
+      const salzbruecke = document.getElementById('salzbruecke').value;
+      const batterie = document.getElementById('batterie').value;
+      const selects = document.querySelectorAll('section:nth-of-type(4) select');
+      const auswahl = Array.from(selects).map(sel => sel.value);
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      let y = 13;
+
+      function addMultiline(text, x, y, maxWidth = 180, lineHeight = 7) {
+        if (!text) text = "-";
+        const lines = pdf.splitTextToSize(text, maxWidth);
+        lines.forEach(line => {
+          pdf.text(line, x, y);
+          y += lineHeight;
+        });
+        return y;
+      }
+
+      pdf.setFontSize(18); pdf.setTextColor(34,101,212); pdf.text('Arbeitsblatt: Das Daniell-Element', 10, y); y+=10;
+      pdf.setTextColor(0,0,0);
+
+      pdf.setFontSize(13); pdf.text('a) Zeichnung:', 10, y); y+=5;
+      if (zeichenfeldImage) pdf.addImage(zeichenfeldImage, 'PNG', 13, y, 80, 44); y += 52;
+
+      pdf.setFontSize(12); pdf.text('b) Elektronenfluss:', 10, y); y += 6;
+      pdf.setFont('courier','normal');
+      y = addMultiline(eleFlow, 13, y, 180, 7) + 4;
+      pdf.setFont('helvetica','normal');
+
+      pdf.setFontSize(12); pdf.text('c) Salzbrücke:', 10, y); y += 6;
+      pdf.setFont('courier','normal');
+      y = addMultiline(salzbruecke, 13, y, 180, 7) + 4;
+      pdf.setFont('helvetica','normal');
+
+      pdf.setFontSize(12); pdf.text('d) Begriffe zuordnen:', 10, y); y += 5;
+      const dlabels = [
+        "Der Zinkstab gibt Elektronen ab:",
+        "Die Kupferionen nehmen Elektronen auf:",
+        "Die Reaktion im Daniell-Element ist insgesamt eine:",
+        "Die Elektronen bewegen sich von Zink zum Kupfer:"
+      ];
+      pdf.setFont('courier','normal'); pdf.setFontSize(11);
+      dlabels.forEach((label, i) => {
+        pdf.text(`${label} ${auswahl[i] || '-'}`, 13, y);
+        y+=7;
+      });
+      y+=3;
+      pdf.setFont('helvetica','normal');
+
+      pdf.setFontSize(12); pdf.text('e) Zusatzaufgabe:', 10, y); y += 6;
+      pdf.setFont('courier','normal');
+      y = addMultiline(batterie, 13, y, 180, 7) + 6;
+      pdf.setFont('helvetica','normal');
+
+      pdf.save('Daniell-Element_Arbeitsblatt.pdf');
+    }
+  </script>
+</body>
+</html>
